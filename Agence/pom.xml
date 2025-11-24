@@ -16,42 +16,36 @@
     <artifactId>Agence</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Agence</name>
-    <description>Agence SOAP - Intermediaire entre Client REST et Hotels SOAP</description>
+    <description>Agence REST - Intermediaire entre Client REST et Hotels REST</description>
 
     <properties>
         <java.version>8</java.version>
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Web Services pour SOAP (serveur SOAP pour client + client SOAP pour hôtels) -->
+        <!-- Spring Boot Web pour REST API -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web-services</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- WSDL4J pour générer et consommer WSDL -->
+        <!-- WebClient pour les appels REST asynchrones (optionnel mais recommandé) -->
         <dependency>
-            <groupId>wsdl4j</groupId>
-            <artifactId>wsdl4j</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-        <!-- JAXB pour Java 8 -->
+        <!-- Validation -->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- OpenAPI/Swagger pour documentation REST -->
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.3.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>2.3.0</version>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.15</version>
         </dependency>
 
         <!-- Spring Boot Starter Test -->
@@ -67,43 +61,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
-            <!-- Plugin pour générer les classes Java depuis agence.xsd (serveur SOAP) -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jaxb2-maven-plugin</artifactId>
-                <version>2.5.0</version>
-                <executions>
-                    <execution>
-                        <id>xjc-agence</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/src/main/resources/xsd/agence.xsd</source>
-                            </sources>
-                            <packageName>org.tp1.agence.soap</packageName>
-                            <clearOutputDir>false</clearOutputDir>
-                            <outputDirectory>${project.basedir}/target/generated-sources/jaxb</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>xjc-hotel</id>
-                        <goals>
-                            <goal>xjc</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/src/main/resources/xsd/hotel.xsd</source>
-                            </sources>
-                            <packageName>org.tp1.agence.wsdl.hotel</packageName>
-                            <clearOutputDir>false</clearOutputDir>
-                            <outputDirectory>${project.basedir}/target/generated-sources/jaxb</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

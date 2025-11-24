@@ -14,6 +14,16 @@ public class ReservationResponse {
         this.success = success;
     }
 
+    // Méthode factory pour créer une réponse de succès
+    public static ReservationResponse success(int reservationId, String message) {
+        return new ReservationResponse(reservationId, message, true);
+    }
+
+    // Méthode factory pour créer une réponse d'erreur
+    public static ReservationResponse error(String message) {
+        return new ReservationResponse(0, message, false);
+    }
+
     public int getReservationId() {
         return reservationId;
     }

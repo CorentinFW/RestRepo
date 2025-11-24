@@ -144,6 +144,19 @@ public class HotelController {
     }
 
     /**
+     * GET /api/hotel/chambres/reservees - Lister les chambres actuellement réservées
+     */
+    @GetMapping("/chambres/reservees")
+    @Operation(summary = "Lister les chambres réservées", description = "Retourne la liste des chambres qui ont au moins une réservation")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Liste récupérée avec succès")
+    })
+    public ResponseEntity<List<ChambreDTO>> getChambresReservees() {
+        List<ChambreDTO> chambresReservees = hotelService.getChambresReservees();
+        return ResponseEntity.ok(chambresReservees);
+    }
+
+    /**
      * GET /api/hotel/chambres/{id} - Détails d'une chambre
      */
     @GetMapping("/chambres/{id}")

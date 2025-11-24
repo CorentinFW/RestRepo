@@ -1,36 +1,41 @@
 package org.tp1.agence.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ChambreDTO {
     private int id;
     private String nom;
     private float prix;
-    private int nbrDeLit;
+    private int nbrLits;  // Renommé de nbrDeLit
     private String hotelNom;
     private String hotelAdresse;
+
+    @JsonProperty("image")  // Les hôtels utilisent "image", on mappe vers "imageUrl"
     private String imageUrl;
 
     public ChambreDTO() {
     }
 
-    public ChambreDTO(int id, String nom, float prix, int nbrDeLit, String hotelNom, String hotelAdresse) {
+    public ChambreDTO(int id, String nom, float prix, int nbrLits, String hotelNom, String hotelAdresse) {
         this.id = id;
         this.nom = nom;
         this.prix = prix;
-        this.nbrDeLit = nbrDeLit;
+        this.nbrLits = nbrLits;
         this.hotelNom = hotelNom;
         this.hotelAdresse = hotelAdresse;
     }
 
-    public ChambreDTO(int id, String nom, float prix, int nbrDeLit, String hotelNom, String hotelAdresse, String imageUrl) {
+    public ChambreDTO(int id, String nom, float prix, int nbrLits, String hotelNom, String hotelAdresse, String imageUrl) {
         this.id = id;
         this.nom = nom;
         this.prix = prix;
-        this.nbrDeLit = nbrDeLit;
+        this.nbrLits = nbrLits;
         this.hotelNom = hotelNom;
         this.hotelAdresse = hotelAdresse;
         this.imageUrl = imageUrl;
     }
 
+    // Getters et Setters
     public int getId() {
         return id;
     }
@@ -55,12 +60,12 @@ public class ChambreDTO {
         this.prix = prix;
     }
 
-    public int getNbrDeLit() {
-        return nbrDeLit;
+    public int getNbrLits() {
+        return nbrLits;
     }
 
-    public void setNbrDeLit(int nbrDeLit) {
-        this.nbrDeLit = nbrDeLit;
+    public void setNbrLits(int nbrLits) {
+        this.nbrLits = nbrLits;
     }
 
     public String getHotelNom() {
