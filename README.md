@@ -1,314 +1,326 @@
-# 🏨 Système de Réservation Hôtelière - Architecture SOAP
+# 🏨 Système de Réservation Multi-Agences - Interface Graphique
 
-## 📋 Description
+## 🚀 DÉMARRAGE RAPIDE (1 Commande)
 
-Système distribué de réservation d'hôtels basé sur l'architecture SOAP. Le projet permet à un client de rechercher et réserver des chambres via une agence qui interroge plusieurs hôtels.
-
-### Architecture du système
-
-```
-┌─────────────┐
-│   CLIENT    │  (Port: CLI)
-│  (Spring)   │  Interface en ligne de commande
-└──────┬──────┘
-       │ SOAP
-       ↓
-┌─────────────┐
-│   AGENCE    │  (Port: 8081)
-│  (Spring)   │  Agrège les résultats des hôtels
-└──────┬──────┘
-       │ SOAP
-       ├─────────────┬─────────────┐
-       ↓             ↓             ↓
-┌──────────┐  ┌──────────┐  ┌──────────┐
-│  HÔTEL   │  │  HÔTEL   │  │  HÔTEL   │
-│  Paris   │  │  Lyon    │  │Montpellier│
-│ (8082)   │  │ (8083)   │  │  (8084)  │
-└──────────┘  └──────────┘  └──────────┘
+```bash
+./start-system-maven.sh
 ```
 
-### Flux de communication
+**Temps : ~20 secondes → Une fenêtre graphique s'ouvre avec 20 chambres disponibles !**
 
-1. **Client → Agence** : Le client envoie une requête SOAP (recherche ou réservation)
-2. **Agence → Hôtels** : L'agence interroge tous les hôtels disponibles via SOAP
-3. **Hôtels → Agence** : Chaque hôtel répond avec ses disponibilités
-4. **Agence → Client** : L'agence agrège et renvoie les résultats au client
+**Pour arrêter :**
+```bash
+./arreter-services.sh
+```
 
 ---
 
-## 🚀 Démarrage Rapide
+## 📋 Prérequis
 
-### Prérequis
+- ✅ Java 11+ 
+- ✅ Maven 3.6+
+- ✅ Ubuntu avec interface graphique (ou tout OS avec X11)
 
-- **Java 17** ou supérieur
-- **Maven 3.6+**
-- **Ports disponibles** : 8081, 8082, 8083, 8084
+---
 
-### Option 1 : Démarrage automatique (Recommandé)
+## 🎯 Architecture
 
-#### Avec script robuste (recommandé)
-```bash
-./start-robuste.sh
 ```
-Ce script :
-- Démarre les 3 hôtelleries (Paris, Lyon, Montpellier)
-- Attend que chaque service soit prêt
-- Démarre l'agence
-- Lance le client CLI
-- Nettoie automatiquement à l'arrêt (Ctrl+C)
-
-#### Test rapide
-```bash
-./premier-test.sh
-```
-Guide interactif pour votre premier test du système.
-
-### Option 2 : Démarrage manuel
-
-#### 1. Démarrer les hôtelleries
-
-**Terminal 1 - Hôtel Paris (port 8082)** :
-```bash
-cd Hotellerie
-mvn spring-boot:run -Dspring-boot.run.profiles=paris
+CLIENT GUI (Interface Swing)
+      │
+      ├──> AGENCE 1 (Paris Voyages - 8081)
+      │    ├─> Hôtel Paris (8082)
+      │    └─> Hôtel Lyon (8083)
+      │
+      └──> AGENCE 2 (Sud Réservations - 8085)
+           ├─> Hôtel Lyon (8083) [Partagé]
+           └─> Hôtel Montpellier (8084)
 ```
 
-**Terminal 2 - Hôtel Lyon (port 8083)** :
+**Résultat :** 20 chambres disponibles (5 Paris + 10 Lyon + 5 Montpellier)
+
+---
+
+## 🎮 Utilisation de l'Interface
+
+### Démarrage
+
 ```bash
-cd Hotellerie
-mvn spring-boot:run -Dspring-boot.run.profiles=lyon
+./start-system-maven.sh
 ```
 
-**Terminal 3 - Hôtel Montpellier (port 8084)** :
+**Le script démarre automatiquement :**
+- Les 3 hôtels (Paris, Lyon, Montpellier)
+- Les 2 agences (Agence 1, Agence 2)
+- L'interface graphique Swing
+
+### Recherche de Chambres
+
+1. Remplir le formulaire (ville, dates, critères)
+2. Cliquer sur "🔍 Rechercher"
+3. Les résultats apparaissent dans le tableau
+
+**Exemple :**
+- Ville : Lyon
+- Dates : 2025-12-01 → 2025-12-05
+- **Résultat : 10 chambres**
+
+### Afficher les Images
+
+**Cliquer sur l'icône 🖼 dans le tableau**
+
+→ Une fenêtre s'ouvre avec l'image de la chambre en grand format !
+
+### Réservation
+
+1. Sélectionner une chambre dans le tableau
+2. Double-cliquer ou bouton "📝 Réserver"
+3. Remplir le formulaire client
+4. Valider
+
+### Arrêter le Système
+
 ```bash
-cd Hotellerie
-mvn spring-boot:run -Dspring-boot.run.profiles=montpellier
+./arreter-services.sh
 ```
 
-⏱️ **Attendre 30-60 secondes** que chaque hôtel soit complètement démarré.
+### Menus
 
-#### 2. Démarrer l'agence
-
-**Terminal 4 - Agence (port 8081)** :
-```bash
-cd Agence
-mvn spring-boot:run
-```
-
-⏱️ **Attendre 30-60 secondes** que l'agence soit prête.
-
-#### 3. Démarrer le client
-
-**Terminal 5 - Client CLI** :
-```bash
-cd Client
-mvn spring-boot:run
-```
-
-Le client démarre automatiquement l'interface en ligne de commande.
+- **Fichier** → Quitter
+- **Actions** → Rechercher (Ctrl+R), Réserver (Ctrl+B), Voir réservations (Ctrl+V)
+- **Aide** → À propos
 
 ---
 
 ## 📂 Structure du Projet
 
 ```
-SoapRepository/
-├── Hotellerie/          # Service SOAP des hôtels
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── org/tp1/hotellerie/
-│   │       │       ├── soap/          # Endpoint SOAP
-│   │       │       ├── service/       # Logique métier
-│   │       │       └── model/         # Modèle de données
-│   │       └── resources/
-│   │           ├── application-paris.properties
-│   │           ├── application-lyon.properties
-│   │           ├── application-montpellier.properties
-│   │           ├── wsdl/              # Contrat WSDL
-│   │           └── xsd/               # Schémas XML
-│   └── README.md
+RestRepo/
+├── compile-all.sh                    ⭐ Compiler tous les modules
+├── start-system-complete-gui.sh      ⭐ Démarrer tout le système
+├── GUIDE-FINAL-DEMARRAGE.md          📖 Guide complet
 │
-├── Agence/              # Service SOAP de l'agence
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── org/tp1/agence/
-│   │       │       ├── endpoint/      # Endpoint SOAP (serveur)
-│   │       │       ├── client/        # Clients SOAP (vers hôtels)
-│   │       │       ├── service/       # Logique d'agrégation
-│   │       │       └── dto/           # Objets de transfert
-│   │       └── resources/
-│   │           ├── application.properties
-│   │           └── wsdl/              # WSDL de l'agence et des hôtels
-│   └── README.md
+├── Hotellerie/                       🏨 Module Hôtels
+│   └── target/Hotellerie-*.jar
 │
-├── Client/              # Application cliente CLI
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/
-│   │       │   └── org/tp1/client/
-│   │       │       ├── cli/           # Interface ligne de commande
-│   │       │       ├── soap/          # Client SOAP (vers agence)
-│   │       │       └── wsdl/          # Classes générées
-│   │       └── resources/
-│   │           └── application.properties
-│   └── README.md
+├── Agence/                           🏢 Module Agences  
+│   └── target/Agence-*.jar
 │
-├── Image/               # Images des hôtels
-├── ALLReadme/           # Archive des anciens README et documentation
-├── Rapport/             # Rapport technique du projet
-└── *.sh                 # Scripts de démarrage et tests
+├── Client/                           🖥️ Interface Graphique
+│   └── target/Client-*.jar
+│
+├── logs/                             📝 Logs des services
+│   ├── hotel-paris.log
+│   ├── hotel-lyon.log
+│   ├── hotel-montpellier.log
+│   ├── agence.log
+│   └── agence2.log
+│
+└── OverFile/                         📁 Documentation archivée
+    ├── AllReadme/                    📚 Tous les .md
+    └── BashSh/                       🔧 Scripts archivés
 ```
 
 ---
 
-## 🔧 Technologies Utilisées
+## ✨ Fonctionnalités
 
-- **Java 17** - Langage de programmation
-- **Spring Boot 2.7.18** - Framework d'application
-- **Spring Web Services (Spring-WS)** - Implémentation SOAP
-- **JAXB** - Génération de classes à partir de XSD
-- **Maven** - Gestion des dépendances et build
-- **SOAP/WSDL** - Protocole de communication entre services
+### Interface Graphique Swing
 
----
+- ✅ Formulaire de recherche graphique
+- ✅ Tableau interactif des résultats
+- ✅ Réservation en quelques clics
+- ✅ Console de logs en temps réel
+- ✅ Menus et raccourcis clavier
+- ✅ Comparaison de prix multi-agences
 
-## 📖 Fonctionnalités
+### Multi-Agences
 
-### Client CLI
-- Recherche de chambres disponibles (par ville, dates, prix, nombre de lits)
-- Réservation de chambres avec validation des dates
-- Affichage des images des hôtels (URL localhost)
-- Consultation des réservations par hôtel
+- ✅ 2 agences interrogées en parallèle
+- ✅ Comparaison de prix automatique
+- ✅ Hôtel Lyon partagé entre les 2 agences
+- ✅ Coefficients différents (1.15 vs 1.20)
 
-### Agence
-- Agrégation des résultats de plusieurs hôtels
-- Routage des requêtes vers les hôtels appropriés
-- Gestion des réservations multi-hôtels
-- Exposition d'une API SOAP unifiée pour le client
+### Données
 
-### Hôtellerie
-- Gestion des chambres et disponibilités
-- Validation des dates de réservation (pas de chevauchement)
-- Génération d'ID uniques pour les réservations
-- Données en mémoire initialisées au démarrage
-- Support multi-instances (Paris, Lyon, Montpellier)
+- ✅ 3 hôtels (Paris, Lyon, Montpellier)
+- ✅ 5 chambres par hôtel
+- ✅ 20 chambres visibles au total
+- ✅ Images des chambres
 
 ---
 
-## 🧪 Tests
+## 🛑 Arrêter le Système
 
-### Test complet du système
+### Fermer l'Interface
+
+Cliquer sur la croix (X) de la fenêtre.
+
+### Arrêter les Services Backend
+
 ```bash
-./start-robuste.sh
+pkill -f 'java.*Agence'
+pkill -f 'java.*Hotellerie'
 ```
 
-### Test avec un seul hôtel (Paris)
+---
+
+## 📖 Documentation
+
+- **GUIDE-FINAL-DEMARRAGE.md** - Guide complet de démarrage
+- **OverFile/AllReadme/** - Toute la documentation du projet
+- **DIAGNOSTIC-COMPLET-CLIENT.md** - Diagnostic et dépannage
+
+---
+
+## 🔧 Développement
+
+### Démarrage avec Maven (Recommandé)
+
+**Un seul script pour tout :**
 ```bash
-cd Hotellerie
-mvn spring-boot:run -Dspring-boot.run.profiles=paris
-
-# Dans un autre terminal
-cd Agence
-mvn spring-boot:run
-
-# Dans un troisième terminal
-cd Client
-mvn spring-boot:run
+./start-system-maven.sh
 ```
 
-### Vérification des endpoints SOAP
+**Logs dans :** `logs/*.log`
 
-**Hôtel Paris** :
+---
+
+### Démarrage Manuel (6 Terminaux)
+
+**Pour développement/débogage avec logs visibles :**
+
 ```bash
-curl http://localhost:8082/ws?wsdl
+# Afficher les commandes
+./afficher-commandes.sh
+
+# Puis dans 6 terminaux :
+# Terminal 1-3 : Les 3 hôtels avec Maven
+# Terminal 4-5 : Les 2 agences avec Maven  
+# Terminal 6 : Le client GUI
 ```
 
-**Agence** :
+---
+
+### Recompiler Après Modifications
+
 ```bash
-curl http://localhost:8081/ws?wsdl
+./compile-all.sh
 ```
 
 ---
 
-## 📝 Utilisation du Client CLI
+## ✅ Test de Fonctionnement
 
-Une fois le client démarré, vous verrez le menu principal :
+### Test 1 : Recherche Lyon
 
-```
-═══ MENU PRINCIPAL ═══
-1. Rechercher des chambres
-2. Effectuer une réservation
-3. Afficher les dernières chambres trouvées
-4. Afficher toutes les réservations par hôtel
-5. Quitter
+**Critères :**
+- Ville : Lyon
+- Dates : 2025-12-01 → 2025-12-05
+
+**Résultat attendu :** 10 chambres
+
+### Test 2 : Recherche Paris
+
+**Critères :**
+- Ville : Paris
+- Dates : 2025-12-01 → 2025-12-05
+
+**Résultat attendu :** 5 chambres (via Agence 1 uniquement)
+
+### Test 3 : Recherche Sans Critère
+
+**Critères :**
+- Aucun critère
+- Dates : 2025-12-01 → 2025-12-05
+
+**Résultat attendu :** 20 chambres
+
+---
+
+## 🐛 Dépannage
+
+### Problème : "Aucune chambre trouvée"
+
+**Cause :** Services backend pas démarrés
+
+**Solution :**
+```bash
+# Vérifier les services
+ps aux | grep -E 'java.*Agence|java.*Hotellerie' | grep -v grep
+
+# Si vide, relancer
+./start-system-complete-gui.sh
 ```
 
-### Exemple de recherche
-```
-Votre choix: 1
-Ville: Paris
-Date d'arrivée (YYYY-MM-DD): 2025-12-01
-Date de départ (YYYY-MM-DD): 2025-12-05
-Prix minimum (ou entrée pour ignorer): 50
-Prix maximum (ou entrée pour ignorer): 150
-Nombre d'étoiles (ou entrée pour ignorer): 
-Nombre de lits (ou entrée pour ignorer): 2
+### Problème : "BUILD FAILURE"
+
+**Cause :** Erreur de compilation
+
+**Solution :**
+```bash
+# Nettoyer et recompiler
+cd Hotellerie && mvn clean && cd ..
+cd Agence && mvn clean && cd ..
+cd Client && mvn clean && cd ..
+./compile-all.sh
 ```
 
-### Exemple de réservation
-```
-Votre choix: 2
-Numéro de chambre: 101
-Date d'arrivée (YYYY-MM-DD): 2025-12-01
-Date de départ (YYYY-MM-DD): 2025-12-05
-Nom: Dupont
-Prénom: Jean
-Numéro de carte bancaire: 1234567890123456
+### Problème : "HeadlessException"
+
+**Cause :** Mode headless activé
+
+**Solution :** Déjà corrigé dans le code. Si persiste :
+```bash
+export DISPLAY=:0
+./start-system-complete-gui.sh
 ```
 
 ---
 
-## ⚠️ Résolution de Problèmes
+## 📊 Ports Utilisés
 
-### Erreur : "Connexion refusée"
-- Vérifiez que tous les services sont démarrés dans le bon ordre
-- Attendez 30-60 secondes après chaque démarrage
-- Utilisez `./start-robuste.sh` qui gère automatiquement les délais
-
-### Erreur : "Port already in use"
-- Un service est déjà en cours d'exécution sur le port
-- Arrêtez tous les services : `pkill -f "spring-boot:run"`
-- Relancez le système
-
-### Aucune chambre trouvée
-- Vérifiez que les hôtels sont bien démarrés
-- Les données sont initialisées au démarrage de chaque hôtel
-- Consultez les logs des hôtels pour voir les chambres disponibles
-
-### Réservation affiche "Mauvaise date"
-- Les dates demandées chevauchent une réservation existante
-- Essayez d'autres dates ou une autre chambre
+| Service | Port | Description |
+|---------|------|-------------|
+| Hôtel Paris | 8082 | 5 chambres |
+| Hôtel Lyon | 8083 | 5 chambres |
+| Hôtel Montpellier | 8084 | 5 chambres |
+| Agence 1 | 8081 | Paris + Lyon (coef 1.15) |
+| Agence 2 | 8085 | Lyon + Montpellier (coef 1.20) |
 
 ---
 
-## 📚 Documentation Détaillée
+## 🎉 Version
 
-- **[Hotellerie/README.md](Hotellerie/README.md)** - Documentation du service hôtelier
-- **[Agence/README.md](Agence/README.md)** - Documentation du service agence
-- **[Client/README.md](Client/README.md)** - Documentation du client CLI
-- **[Rapport/rapportV1.txt](Rapport/rapportV1.txt)** - Rapport technique complet
-
----
-
-## 👥 Auteurs
-
-Projet développé dans le cadre d'un TP sur les architectures distribuées et SOAP.
+- **Version :** 2.0 - Interface Graphique Swing
+- **Date :** 26 novembre 2025
+- **Architecture :** REST avec Spring Boot
+- **Interface :** Java Swing
+- **Statut :** ✅ Production Ready
 
 ---
 
-## 📄 Licence
+## 🚀 COMMANDES ESSENTIELLES
 
-Projet académique - Usage éducatif uniquement.
+```bash
+# Démarrer le système complet (Maven)
+./start-system-maven.sh
+
+# Arrêter tous les services
+./arreter-services.sh
+
+# Voir les logs en temps réel
+tail -f logs/hotel-paris.log
+tail -f logs/agence1.log
+
+# Nettoyer les services et ports
+./nettoyer-services.sh
+
+# Compiler tous les modules (si modifications)
+./compile-all.sh
+```
+
+---
+
+**Prêt à utiliser !** 🎨✨
 
