@@ -1,4 +1,5 @@
 org/tp1/client/dto/ReservationResponse.class
+org/tp1/client/rest/MultiAgenceRestClient.class
 org/tp1/client/rest/AgenceRestClient.class
 org/tp1/client/dto/ChambreDTO.class
 org/tp1/client/dto/RechercheRequest.class

@@ -16,6 +16,8 @@ public class ChambreDTO {
     @JsonProperty("image")  // Le JSON utilise "image" au lieu de "imageUrl"
     private String imageUrl;
 
+    private String agenceNom;  // Nom de l'agence qui propose cette chambre
+
     public ChambreDTO() {
     }
 
@@ -76,6 +78,14 @@ public class ChambreDTO {
         this.imageUrl = imageUrl;
     }
 
+    public String getAgenceNom() {
+        return agenceNom;
+    }
+
+    public void setAgenceNom(String agenceNom) {
+        this.agenceNom = agenceNom;
+    }
+
     @Override
     public String toString() {
         return "ChambreDTO{" +
@@ -85,6 +95,7 @@ public class ChambreDTO {
                 ", nbrLits=" + nbrLits +
                 ", hotelNom='" + hotelNom + '\'' +
                 ", hotelAdresse='" + hotelAdresse + '\'' +
+                ", agenceNom='" + agenceNom + '\'' +
                 '}';
     }
 }

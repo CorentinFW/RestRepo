@@ -26,30 +26,43 @@ public class MultiHotelRestClient {
     @Autowired
     private HotelRestClient hotelRestClient;
 
-    @Value("${hotel.paris.url:http://localhost:8082}")
+    @Value("${agence.nom:Agence Inconnue}")
+    private String agenceNom;
+
+    @Value("${agence.coefficient:1.0}")
+    private float agenceCoefficient;
+
+    @Value("${hotel.paris.url:#{null}}")
     private String hotelParisUrl;
 
-    @Value("${hotel.lyon.url:http://localhost:8083}")
+    @Value("${hotel.lyon.url:#{null}}")
     private String hotelLyonUrl;
 
-    @Value("${hotel.montpellier.url:http://localhost:8084}")
+    @Value("${hotel.montpellier.url:#{null}}")
     private String hotelMontpellierUrl;
 
     private List<String> hotelUrls = new ArrayList<>();
 
     @PostConstruct
     public void init() {
-        // Initialiser la liste des URLs des hôtels
-        hotelUrls.add(hotelParisUrl);
-        hotelUrls.add(hotelLyonUrl);
-        hotelUrls.add(hotelMontpellierUrl);
+        // Initialiser la liste des URLs des hôtels (seulement ceux configurés)
+        if (hotelParisUrl != null && !hotelParisUrl.isEmpty()) {
+            hotelUrls.add(hotelParisUrl);
+        }
+        if (hotelLyonUrl != null && !hotelLyonUrl.isEmpty()) {
+            hotelUrls.add(hotelLyonUrl);
+        }
+        if (hotelMontpellierUrl != null && !hotelMontpellierUrl.isEmpty()) {
+            hotelUrls.add(hotelMontpellierUrl);
+        }
 
         System.out.println("═══════════════════════════════════════════");
-        System.out.println("  Agence - Configuration REST");
+        System.out.println("  " + agenceNom + " - Configuration REST");
+        System.out.println("  Coefficient de prix: " + agenceCoefficient);
         System.out.println("  Nombre d'hôtels: " + hotelUrls.size());
-        System.out.println("  Hôtel Paris: " + hotelParisUrl);
-        System.out.println("  Hôtel Lyon: " + hotelLyonUrl);
-        System.out.println("  Hôtel Montpellier: " + hotelMontpellierUrl);
+        if (hotelParisUrl != null) System.out.println("  - Hôtel Paris: " + hotelParisUrl);
+        if (hotelLyonUrl != null) System.out.println("  - Hôtel Lyon: " + hotelLyonUrl);
+        if (hotelMontpellierUrl != null) System.out.println("  - Hôtel Montpellier: " + hotelMontpellierUrl);
         System.out.println("═══════════════════════════════════════════");
     }
 
@@ -75,6 +88,12 @@ public class MultiHotelRestClient {
                         for (ChambreDTO chambre : chambres) {
                             if (hotelNom != null) chambre.setHotelNom(hotelNom);
                             if (hotelAdresse != null) chambre.setHotelAdresse(hotelAdresse);
+
+                            // Appliquer le coefficient de prix de l'agence
+                            chambre.setPrix(chambre.getPrix() * agenceCoefficient);
+
+                            // Ajouter le nom de l'agence
+                            chambre.setAgenceNom(agenceNom);
                         }
 
                         System.out.println("✓ [" + hotelUrl + "] Trouvé " + chambres.size() + " chambre(s)");
@@ -187,6 +206,12 @@ public class MultiHotelRestClient {
                     if (hotelAdresse != null) {
                         chambre.setHotelAdresse(hotelAdresse);
                     }
+
+                    // Appliquer le coefficient de prix de l'agence
+                    chambre.setPrix(chambre.getPrix() * agenceCoefficient);
+
+                    // Ajouter le nom de l'agence
+                    chambre.setAgenceNom(agenceNom);
                 }
 
                 chambresReserveesParHotel.put(hotelNom, chambres);

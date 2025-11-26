@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tp1.client.dto.ChambreDTO;
 import org.tp1.client.dto.ReservationResponse;
-import org.tp1.client.rest.AgenceRestClient;
+import org.tp1.client.rest.MultiAgenceRestClient;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.Scanner;
 public class ClientCLIRest {
 
     @Autowired
-    private AgenceRestClient agenceRestClient;
+    private MultiAgenceRestClient agenceRestClient;
 
     private Scanner scanner;
     private List<ChambreDTO> dernieresChambres;
@@ -86,7 +86,7 @@ public class ClientCLIRest {
         System.out.println(CYAN + BOLD);
         System.out.println("╔═══════════════════════════════════════════════════╗");
         System.out.println("║                                                   ║");
-        System.out.println("║   SYSTÈME DE RÉSERVATION HÔTELIÈRE - CLIENT REST  ║");
+        System.out.println("║   SYSTÈME DE RÉSERVATION - CLIENT MULTI-AGENCES  ║");
         System.out.println("║                                                   ║");
         System.out.println("╚═══════════════════════════════════════════════════╝");
         System.out.println(RESET);
@@ -172,8 +172,14 @@ public class ClientCLIRest {
             System.out.println(BOLD + "─── Chambre " + index++ + " ───" + RESET);
             System.out.println("  🏨 Hôtel: " + CYAN + chambre.getHotelNom() + RESET);
             System.out.println("  📍 Adresse: " + chambre.getHotelAdresse());
+
+            // Afficher l'agence si disponible
+            if (chambre.getAgenceNom() != null && !chambre.getAgenceNom().isEmpty()) {
+                System.out.println("  🏢 Agence: " + YELLOW + chambre.getAgenceNom() + RESET);
+            }
+
             System.out.println("  🚪 Chambre: " + BLUE + chambre.getNom() + RESET + " (ID: " + chambre.getId() + ")");
-            System.out.println("  💰 Prix: " + GREEN + chambre.getPrix() + " €" + RESET);
+            System.out.println("  💰 Prix: " + GREEN + String.format("%.2f", chambre.getPrix()) + " €" + RESET);
             System.out.println("  🛏️  Lits: " + chambre.getNbrLits());
 
             // Afficher l'URL de l'image si disponible
@@ -248,7 +254,8 @@ public class ClientCLIRest {
                 nom, prenom, numeroCarte,
                 chambreChoisie.getId(),
                 chambreChoisie.getHotelAdresse(),
-                dateArrive, dateDepart
+                dateArrive, dateDepart,
+                chambreChoisie.getAgenceNom()  // Passer le nom de l'agence
             );
 
             if (response.isSuccess()) {
@@ -320,8 +327,13 @@ public class ClientCLIRest {
                 } else {
                     for (ChambreDTO chambre : chambres) {
                         System.out.println("  🚪 " + chambre.getNom() + " (ID: " + chambre.getId() + ")");
-                        System.out.println("     💰 Prix: " + GREEN + chambre.getPrix() + " €" + RESET);
+                        System.out.println("     💰 Prix: " + GREEN + String.format("%.2f", chambre.getPrix()) + " €" + RESET);
                         System.out.println("     🛏️  Lits: " + chambre.getNbrLits());
+
+                        // Afficher l'agence si disponible
+                        if (chambre.getAgenceNom() != null && !chambre.getAgenceNom().isEmpty()) {
+                            System.out.println("     🏢 Agence: " + YELLOW + chambre.getAgenceNom() + RESET);
+                        }
 
                         // Afficher l'URL de l'image si disponible
                         if (chambre.getImageUrl() != null && !chambre.getImageUrl().isEmpty()) {

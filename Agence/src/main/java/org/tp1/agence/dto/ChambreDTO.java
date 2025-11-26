@@ -13,6 +13,8 @@ public class ChambreDTO {
     @JsonProperty("image")  // Les hôtels utilisent "image", on mappe vers "imageUrl"
     private String imageUrl;
 
+    private String agenceNom;  // Nom de l'agence qui propose cette chambre
+
     public ChambreDTO() {
     }
 
@@ -90,6 +92,14 @@ public class ChambreDTO {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getAgenceNom() {
+        return agenceNom;
+    }
+
+    public void setAgenceNom(String agenceNom) {
+        this.agenceNom = agenceNom;
     }
 }
 
