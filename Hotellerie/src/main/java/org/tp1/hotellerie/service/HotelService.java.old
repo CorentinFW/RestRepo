@@ -363,3 +363,19 @@ public class HotelService {
         }
     }
 }
+        public ReservationResult(int reservationId, boolean success, String message) {
+            this.reservationId = reservationId;
+            this.success = success;
+            this.message = message;
+        }
+        public int getReservationId() {
+            return reservationId;
+        }
+        public boolean isSuccess() {
+            return success;
+        }
+        public String getMessage() {
+            return message;
+        }
+    }
+}
