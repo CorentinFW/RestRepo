@@ -1,407 +1,197 @@
-# 🏨 Système de Réservation Hôtelière - Multi-Agences REST
+# 🏨 Système de Réservation d'Hôtels - REST avec H2
 
-[![Version](https://img.shields.io/badge/version-2.0-blue.svg)](https://github.com)
-[![Java](https://img.shields.io/badge/java-11+-orange.svg)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/spring%20boot-2.7.18-green.svg)](https://spring.io/projects/spring-boot)
-[![Status](https://img.shields.io/badge/status-production%20ready-success.svg)](https://github.com)
+> **Version finale avec base de données H2 et correction du bug de réservation**
 
-Système distribué de réservation de chambres d'hôtel utilisant une **architecture REST** avec Spring Boot. Le système permet la comparaison de prix en temps réel entre plusieurs agences de voyage.
+## 🚀 Démarrage ultra-rapide
 
----
-
-## 🚀 DÉMARRAGE RAPIDE (1 commande)
-
+### Option 1 : Script automatique (RECOMMANDÉ)
 ```bash
 cd /home/corentinfay/Bureau/RestRepo
-./start-multi-rest.sh
+./fix-and-restart.sh
 ```
 
-Le système démarre automatiquement :
-- ✅ 3 Hôtels (Paris, Lyon, Montpellier)
-- ✅ 2 Agences (Paris Voyages, Sud Réservations)
-- ✅ 1 Client CLI interactif
-
-**Temps de démarrage : ~40-50 secondes**
-
-### Arrêter le système
-
+### Option 2 : Démarrage manuel
 ```bash
-./stop-multi-rest.sh
-```
-
----
-
-## 🏗️ Architecture
-
-```
-                 CLIENT CLI
-              (Multi-Agences)
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-        ▼                       ▼
-    AGENCE 1                AGENCE 2
-  Paris Voyages          Sud Réservations
-    (8081)                  (8085)
-   Coef: 1.15              Coef: 1.20
-        │                       │
-    ┌───┴───┐               ┌───┴────┐
-    │       │               │        │
-    ▼       ▼               ▼        ▼
-  PARIS   LYON  ◄─────────► LYON  MONTPEL.
-  (8082)  (8083)  PARTAGÉ   (8083) (8084)
-```
-
-### Composants
-
-| Service | Port | Hôtels connectés | Coefficient |
-|---------|------|------------------|-------------|
-| **Hôtel Paris** | 8082 | - | - |
-| **Hôtel Lyon** | 8083 | - | - |
-| **Hôtel Montpellier** | 8084 | - | - |
-| **Agence 1** | 8081 | Paris + Lyon | ×1.15 |
-| **Agence 2** | 8085 | Lyon + Montpellier | ×1.20 |
-| **Client CLI** | - | Agence 1 + Agence 2 | - |
-
----
-
-## ✨ Fonctionnalités
-
-### 🔍 Recherche Multi-Agences
-- Interrogation parallèle de toutes les agences
-- Agrégation automatique des résultats
-- Conservation des doublons pour comparaison de prix
-
-### 💰 Comparaison de Prix
-- **Agence 1** : Prix × 1.15 (15% de commission)
-- **Agence 2** : Prix × 1.20 (20% de commission)
-- **Lyon** visible dans les 2 agences avec prix différents
-
-**Exemple :**
-- Chambre Lyon (prix de base 75€)
-  - Via Agence 1 : **86.25€** ✅ (économie de 3.75€)
-  - Via Agence 2 : **90€**
-
-### 🏨 Hôtels Partagés
-- **Lyon** accessible depuis les 2 agences
-- Permet la comparaison directe des prix
-- Le client choisit la meilleure offre
-
-### 🖼️ Images des Chambres
-Chaque chambre dispose d'une URL d'image accessible via HTTP.
-
----
-
-## 📋 Prérequis
-
-- **Java** 11 ou supérieur
-- **Maven** 3.6+
-- **Ports libres** : 8081, 8082, 8083, 8084, 8085
-
----
-
-## 📚 Documentation
-
-- **[GUIDE-UTILISATION.md](GUIDE-UTILISATION.md)** - Guide complet d'utilisation
-- **[LISTE-SCRIPTS.md](LISTE-SCRIPTS.md)** - Tous les scripts disponibles
-- **[PROBLEME-RESOLU.md](PROBLEME-RESOLU.md)** - Solution au problème de configuration
-- **[CONFIGURATION-VALIDEE.md](CONFIGURATION-VALIDEE.md)** - Détails de la configuration
-- **[INSTRUCTIONS-DEMARRAGE-MANUEL.md](INSTRUCTIONS-DEMARRAGE-MANUEL.md)** - Démarrage manuel
-
----
-
-## 🎮 Utilisation du Client CLI
-
-Une fois démarré, le client affiche ce menu :
-
-```
-═══ MENU PRINCIPAL ═══
-1. Rechercher des chambres
-2. Effectuer une réservation
-3. Afficher les dernières chambres trouvées
-4. Afficher les hôtels disponibles
-5. Afficher les chambres réservées par hôtel
-6. Quitter
-```
-
-### Recherche de chambres
-
-**Résultat attendu : 20 chambres**
-- 5 chambres **Paris** (via Agence 1 uniquement)
-- 10 chambres **Lyon** (5 via Agence 1 + 5 via Agence 2)
-- 5 chambres **Montpellier** (via Agence 2 uniquement)
-
-Chaque chambre affiche :
-- 🏨 Nom de l'hôtel
-- 📍 Adresse
-- 🏢 **Nom de l'agence**
-- 💰 Prix avec coefficient appliqué
-- 🛏️ Nombre de lits
-- 🖼️ URL de l'image
-
----
-
-## 🧪 Tests
-
-### Test automatique de configuration
-
-```bash
-./test-configuration-finale.sh
-```
-
-Vérifie que :
-- ✅ Agence 1 retourne Paris + Lyon (10 chambres)
-- ✅ Agence 2 retourne Lyon + Montpellier (10 chambres)
-
-### Test manuel avec curl
-
-**Agence 1 :**
-```bash
-curl -s -X POST http://localhost:8081/api/agence/chambres/rechercher \
-  -H "Content-Type: application/json" \
-  -d '{"dateArrive":"2025-12-01","dateDepart":"2025-12-05"}'
-```
-
-**Agence 2 :**
-```bash
-curl -s -X POST http://localhost:8085/api/agence/chambres/rechercher \
-  -H "Content-Type: application/json" \
-  -d '{"dateArrive":"2025-12-01","dateDepart":"2025-12-05"}'
-```
-
----
-
-## 📁 Structure du Projet
-
-```
-RestRepo/
-├── start-multi-rest.sh          ⭐ Script de démarrage principal
-├── stop-multi-rest.sh           ⭐ Script d'arrêt
-├── test-configuration-finale.sh ⭐ Script de test
-│
-├── Hotellerie/                  Module Hôtels
-│   ├── src/main/
-│   │   ├── java/               HotelController, HotelService
-│   │   └── resources/          Configs (paris, lyon, montpellier)
-│   └── Image/                  Images des hôtels
-│
-├── Agence/                      Module Agences
-│   ├── src/main/
-│   │   ├── java/               AgenceController, MultiHotelRestClient
-│   │   └── resources/
-│   │       ├── application.properties            (vide)
-│   │       ├── application-agence1.properties    Paris + Lyon
-│   │       └── application-agence2.properties    Lyon + Montpellier
-│   └── target/                 JAR compilé
-│
-├── Client/                      Module Client
-│   ├── src/main/
-│   │   ├── java/               ClientCLIRest, MultiAgenceRestClient
-│   │   └── resources/          Config multi-agences
-│   └── target/
-│
-└── logs/                        Logs des services
-    ├── hotel-paris.log
-    ├── hotel-lyon.log
-    ├── hotel-montpellier.log
-    ├── agence.log
-    └── agence2.log
-```
-
----
-
-## 🔧 Configuration
-
-### Modifier les coefficients
-
-**Agence 1 :**
-```properties
-# Fichier: Agence/src/main/resources/application-agence1.properties
-agence.coefficient=1.15
-```
-
-**Agence 2 :**
-```properties
-# Fichier: Agence/src/main/resources/application-agence2.properties
-agence.coefficient=1.20
-```
-
-Après modification :
-```bash
-cd Agence
-mvn clean package -DskipTests
-cd ..
-./start-multi-rest.sh
-```
-
----
-
-## 📝 Logs
-
-Les logs sont disponibles dans le dossier `logs/` :
-
-```bash
-# Suivre les logs en temps réel
-tail -f logs/agence.log      # Agence 1
-tail -f logs/agence2.log     # Agence 2
-tail -f logs/hotel-lyon.log  # Hôtel Lyon
-```
-
----
-
-## 🛠️ Développement
-
-### Compiler le projet
-
-```bash
+# 1. Recompiler Hotellerie (obligatoire après correction)
+cd /home/corentinfay/Bureau/RestRepo/Hotellerie
 mvn clean install -DskipTests
-```
 
-### Démarrage manuel (pour debug)
+# 2. Démarrer tous les services
+cd ..
+./start-system-maven.sh
 
-**Terminal 1-3 : Hôtels**
-```bash
-cd Hotellerie
-mvn spring-boot:run -Dspring-boot.run.profiles=paris
-mvn spring-boot:run -Dspring-boot.run.profiles=lyon
-mvn spring-boot:run -Dspring-boot.run.profiles=montpellier
-```
-
-**Terminal 4-5 : Agences**
-```bash
-cd Agence
-mvn spring-boot:run -Dspring-boot.run.profiles=agence1
-mvn spring-boot:run -Dspring-boot.run.profiles=agence2
-```
-
-**Terminal 6 : Client**
-```bash
+# 3. Lancer le client (dans un nouveau terminal)
 cd Client
 mvn spring-boot:run
 ```
 
 ---
 
-## 🆘 Dépannage
+## ✅ Vérification rapide
 
-### Problème : Port déjà utilisé
+Une fois le client lancé :
+
+1. **Rechercher** : Ville = Paris, Dates = 01/12/2025 → 05/12/2025
+2. **Résultat** : Vous devriez voir 5 chambres
+3. **Réserver** : Cliquer sur une chambre, puis "Réserver"
+4. **Succès** : ✅ "Réservation effectuée avec succès"
+
+---
+
+## 📚 Documentation
+
+| Fichier | Contenu | Quand consulter |
+|---------|---------|-----------------|
+| **CORRECTION-BUG-RESERVATION.md** | Détails du bug corrigé | En cas de problème de réservation |
+| **DEMARRAGE-RAPIDE-H2.md** | Guide de démarrage complet | Pour les commandes détaillées |
+| **IMPLEMENTATION-H2-COMPLETE.md** | Documentation H2 | Pour comprendre la base de données |
+| **GUIDE-IMPLEMENTATION-H2.md** | Guide technique | Pour la configuration avancée |
+
+---
+
+## 🐛 Bug corrigé (27/11/2025)
+
+**Problème** : Erreur "Chambre non trouvée" lors de la réservation  
+**Cause** : Confusion entre ID de base de données et numéro de chambre  
+**Solution** : Recherche par ID au lieu du numéro  
+
+➡️ **Voir `CORRECTION-BUG-RESERVATION.md` pour les détails**
+
+---
+
+## 🔍 Accès rapides
+
+### Console H2 (visualiser la base de données)
+- Paris : http://localhost:8082/h2-console
+- Lyon : http://localhost:8083/h2-console
+- Montpellier : http://localhost:8084/h2-console
+
+**Connexion** : `jdbc:h2:file:./data/hotellerie-db` / User: `sa` / Pass: *(vide)*
+
+### API REST (documentation Swagger)
+- Hôtels : http://localhost:808X/swagger-ui.html (X = 2, 3, 4)
+- Agences : http://localhost:8081/swagger-ui.html et http://localhost:8085/swagger-ui.html
+
+---
+
+## 🛠️ Commandes utiles
 
 ```bash
-# Voir qui utilise les ports
-ss -tlnp | grep -E ':(8081|8082|8083|8084|8085)'
-
 # Arrêter tous les services
-./stop-multi-rest.sh
+./arreter-services.sh
+
+# Voir les logs
+tail -f logs/hotel-paris.log
+tail -f logs/agence1.log
+
+# Réinitialiser la base de données
+rm -rf Hotellerie/data
 ```
 
-### Problème : Services ne démarrent pas
+---
 
+## 📦 Architecture
+
+```
+RestRepo/
+├── Hotellerie/           # Services hôteliers (ports 8082-8084)
+│   ├── data/            # Base de données H2 (NOUVEAU)
+│   └── src/             # Code source
+├── Agence/              # Services agences (ports 8081, 8085)
+│   └── src/
+├── Client/              # Interface graphique Swing
+│   └── src/
+├── logs/                # Logs des services
+├── fix-and-restart.sh          # Script de correction
+├── start-system-maven.sh       # Démarrage complet
+└── arreter-services.sh         # Arrêt des services
+```
+
+---
+
+## ✨ Fonctionnalités
+
+- ✅ Recherche de chambres disponibles
+- ✅ Réservation avec persistance en base H2
+- ✅ Multi-agences (2 agences)
+- ✅ Multi-hôtels (3 hôtels: Paris, Lyon, Montpellier)
+- ✅ Interface graphique Swing
+- ✅ Gestion des images de chambres
+- ✅ Coefficients de prix par agence
+- ✅ Détection des conflits de réservation
+
+---
+
+## 🎓 Technologies utilisées
+
+- **Backend** : Spring Boot 2.7.18, REST API
+- **Base de données** : H2 (mode fichier)
+- **Persistance** : Spring Data JPA, Hibernate
+- **Frontend** : Java Swing
+- **Documentation** : Swagger/OpenAPI
+- **Build** : Maven
+
+---
+
+## 💡 Astuces
+
+### Tester la persistance
+
+1. Faire une réservation
+2. Arrêter tous les services : `./arreter-services.sh`
+3. Redémarrer : `./start-system-maven.sh`
+4. Relancer le client
+5. Vérifier que la réservation existe toujours via Console H2
+
+### Voir les données en base
+
+```sql
+-- Dans la console H2
+SELECT * FROM reservations;
+SELECT * FROM chambres;
+SELECT * FROM clients;
+```
+
+### Debug
+
+Si un service ne démarre pas :
 ```bash
-# Recompiler
-mvn clean install -DskipTests
+# Vérifier les ports utilisés
+netstat -tuln | grep 808
 
-# Vérifier les logs
-tail -50 logs/agence.log
-```
+# Tuer les processus zombies
+pkill -f "Hotellerie\|Agence"
 
-### Problème : Le client ne trouve pas les chambres
-
-```bash
-# Vérifier que tous les services tournent
-ps aux | grep -E 'java.*(Hotellerie|Agence)' | grep -v grep
-
-# Devrait afficher 8 processus
+# Relancer
+./start-system-maven.sh
 ```
 
 ---
 
-## 🎯 Cas d'Usage Typique
+## 📞 En cas de problème
 
-### Scénario : Trouver la meilleure offre pour Lyon
-
-1. **Démarrer le système**
-   ```bash
-   ./start-multi-rest.sh
-   ```
-
-2. **Dans le Client CLI**
-   - Choisir option 1 (Rechercher)
-   - Ville : Lyon
-   - Dates : 2025-12-01 → 2025-12-05
-
-3. **Observer les résultats**
-   - 10 chambres Lyon (5 de chaque agence)
-   - Prix différents : 86.25€ vs 90€
-   - Économie visible : 3.75€
-
-4. **Réserver**
-   - Option 2
-   - Choisir une chambre de l'Agence 1 (moins chère)
-
-5. **Quitter proprement**
-   - Option 6 dans le menu
-   - `./stop-multi-rest.sh`
+1. ✅ Vérifier que la correction a été appliquée : `ls -la fix-and-restart.sh`
+2. ✅ Recompiler : `cd Hotellerie && mvn clean install`
+3. ✅ Consulter les logs : `tail -f logs/*.log`
+4. ✅ Lire `CORRECTION-BUG-RESERVATION.md`
 
 ---
 
-## 🏆 Avantages du Système
+## 🎉 Statut du projet
 
-- ✅ **Comparaison automatique** des prix entre agences
-- ✅ **Recherche parallèle** pour des performances optimales
-- ✅ **Hôtels partagés** pour maximiser les options
-- ✅ **Transparence totale** sur les prix et les agences
-- ✅ **API REST moderne** facile à intégrer
-- ✅ **Architecture extensible** (ajout d'agences/hôtels simple)
-- ✅ **Documentation complète**
+| Composant | Statut |
+|-----------|--------|
+| **Base de données H2** | ✅ Opérationnelle |
+| **API REST** | ✅ Fonctionnelle |
+| **Réservations** | ✅ Corrigées (27/11/2025) |
+| **Interface graphique** | ✅ Opérationnelle |
+| **Persistance** | ✅ Testée |
+| **Documentation** | ✅ Complète |
 
----
-
-## 📊 Statistiques
-
-- **3 Hôtels** avec 5 chambres chacun
-- **2 Agences** avec des coefficients différents
-- **1 Hôtel partagé** (Lyon) pour comparaison
-- **20 Chambres** visibles au total par le client
-- **10 Chambres Lyon** (5 × 2 agences) pour comparaison de prix
+**🏆 Le système est prêt à l'emploi !**
 
 ---
 
-## 🚀 Évolutions Futures
-
-- [ ] Interface Web (React/Angular)
-- [ ] API Gateway
-- [ ] Base de données persistante
-- [ ] Système de paiement
-- [ ] Programme de fidélité multi-agences
-- [ ] Cache Redis pour les performances
-
----
-
-## 📄 Licence
-
-Projet éducatif - Libre d'utilisation
-
----
-
-## 👥 Contributeurs
-
-- **GitHub Copilot** - Transformation SOAP → REST et implémentation multi-agences
-
----
-
-## 📞 Support
-
-En cas de problème :
-1. Consultez **[GUIDE-UTILISATION.md](GUIDE-UTILISATION.md)**
-2. Vérifiez les logs dans `logs/`
-3. Testez la configuration avec `./test-configuration-finale.sh`
-4. Redémarrez avec `./stop-multi-rest.sh` puis `./start-multi-rest.sh`
-
----
-
-**Version :** 2.0 - Multi-Agences REST  
-**Date :** 26 novembre 2025  
-**Statut :** ✅ **PRODUCTION READY**
-
-**🎉 Prêt à l'emploi !**
+*Dernière mise à jour : 27 novembre 2025*  
+*Version : 2.0 (avec correction bug réservation)*
 

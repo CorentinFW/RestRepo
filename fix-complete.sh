@@ -129,7 +129,7 @@ if [ $? -eq 0 ]; then
 
     echo ""
     echo "6. Redémarrage des services..."
-    ./start-system-maven.sh
+    ./OverFile/BashSh/start-system-maven.sh
 
     echo ""
     echo "═══════════════════════════════════════════════════════════════"

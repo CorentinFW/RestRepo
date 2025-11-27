@@ -51,7 +51,7 @@ else
     echo "✅ TOUS LES SERVICES SONT ARRÊTÉS"
     echo ""
     echo "Vous pouvez maintenant relancer:"
-    echo "   ./start-system-maven.sh"
+    echo "   ./OverFile/BashSh/start-system-maven.sh"
     echo ""
 fi
 
