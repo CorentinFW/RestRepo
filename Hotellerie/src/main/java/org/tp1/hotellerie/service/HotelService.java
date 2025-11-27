@@ -1,8 +1,11 @@
 package org.tp1.hotellerie.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.tp1.hotellerie.model.*;
+import org.tp1.hotellerie.repository.*;
 
 import javax.annotation.PostConstruct;
 import java.text.ParseException;
@@ -10,13 +13,27 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Service SOAP pour gérer l'hôtel
+ * Service pour gérer l'hôtel avec persistance en base de données H2
  */
 @Service
+@Transactional
 public class HotelService {
+
+    @Autowired
+    private HotelRepository hotelRepository;
+
+    @Autowired
+    private ChambreRepository chambreRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     private Hotel hotel;
     private AtomicInteger reservationIdCounter = new AtomicInteger(1);
@@ -41,44 +58,76 @@ public class HotelService {
         // Convertir la catégorie String en Type enum
         Type type = Type.valueOf(hotelCategorie);
 
-        // Initialiser l'hôtel avec des données de configuration
-        hotel = new Hotel(hotelNom, hotelAdresse, type);
-
         System.out.println("═══════════════════════════════════════════");
         System.out.println("  Initialisation Hôtel: " + hotelVille);
         System.out.println("  Nom: " + hotelNom);
         System.out.println("  Adresse: " + hotelAdresse);
         System.out.println("  Catégorie: " + type);
-        System.out.println("═══════════════════════════════════════════");
 
-        // Déterminer l'image selon la ville
-        String imageFileName = getImageFileName();
-        String imageUrl = "http://localhost:" + serverPort + "/images/" + imageFileName;
+        // Vérifier si l'hôtel existe déjà dans la base
+        Optional<Hotel> existingHotel = hotelRepository.findByNomAndAdresse(hotelNom, hotelAdresse);
 
-        // Ajouter des chambres différentes selon la ville
-        if ("Paris".equals(hotelVille)) {
-            hotel.ajoutChambre(new Chambre(1, "Chambre Simple", 80.0f, 1, imageUrl));
-            hotel.ajoutChambre(new Chambre(2, "Chambre Double", 120.0f, 2, imageUrl));
-            hotel.ajoutChambre(new Chambre(3, "Suite Deluxe", 200.0f, 3, imageUrl));
-            hotel.ajoutChambre(new Chambre(4, "Chambre Familiale", 150.0f, 4, imageUrl));
-            hotel.ajoutChambre(new Chambre(5, "Chambre Economy", 60.0f, 1, imageUrl));
-        } else if ("Lyon".equals(hotelVille)) {
-            hotel.ajoutChambre(new Chambre(11, "Chambre Standard", 70.0f, 1, imageUrl));
-            hotel.ajoutChambre(new Chambre(12, "Chambre Confort", 100.0f, 2, imageUrl));
-            hotel.ajoutChambre(new Chambre(13, "Suite Junior", 150.0f, 2, imageUrl));
-            hotel.ajoutChambre(new Chambre(14, "Chambre Triple", 130.0f, 3, imageUrl));
-            hotel.ajoutChambre(new Chambre(15, "Chambre Budget", 50.0f, 1, imageUrl));
-        } else if ("Montpellier".equals(hotelVille)) {
-            hotel.ajoutChambre(new Chambre(21, "Chambre Eco", 45.0f, 1, imageUrl));
-            hotel.ajoutChambre(new Chambre(22, "Chambre Double Confort", 85.0f, 2, imageUrl));
-            hotel.ajoutChambre(new Chambre(23, "Suite Vue Mer", 140.0f, 2, imageUrl));
-            hotel.ajoutChambre(new Chambre(24, "Chambre Quad", 110.0f, 4, imageUrl));
-            hotel.ajoutChambre(new Chambre(25, "Studio", 65.0f, 1, imageUrl));
+        if (existingHotel.isPresent()) {
+            hotel = existingHotel.get();
+            System.out.println("  ✓ Hôtel chargé depuis la base de données");
+            System.out.println("  Chambres en base: " + hotel.getListeDesChambres().size());
+            System.out.println("  Réservations en base: " + hotel.getListeReservation().size());
+        } else {
+            // Créer un nouvel hôtel
+            hotel = new Hotel(hotelNom, hotelAdresse, type);
+            hotel = hotelRepository.save(hotel);
+            System.out.println("  ✓ Nouvel hôtel créé dans la base");
+
+            // Déterminer l'image selon la ville
+            String imageFileName = getImageFileName();
+            String imageUrl = "http://localhost:" + serverPort + "/images/" + imageFileName;
+
+            // Ajouter des chambres différentes selon la ville
+            if ("Paris".equals(hotelVille)) {
+                ajouterChambre(1, "Chambre Simple", 80.0f, 1, imageUrl);
+                ajouterChambre(2, "Chambre Double", 120.0f, 2, imageUrl);
+                ajouterChambre(3, "Suite Deluxe", 200.0f, 3, imageUrl);
+                ajouterChambre(4, "Chambre Familiale", 150.0f, 4, imageUrl);
+                ajouterChambre(5, "Chambre Economy", 60.0f, 1, imageUrl);
+            } else if ("Lyon".equals(hotelVille)) {
+                ajouterChambre(11, "Chambre Standard", 70.0f, 1, imageUrl);
+                ajouterChambre(12, "Chambre Confort", 100.0f, 2, imageUrl);
+                ajouterChambre(13, "Suite Junior", 150.0f, 2, imageUrl);
+                ajouterChambre(14, "Chambre Triple", 130.0f, 3, imageUrl);
+                ajouterChambre(15, "Chambre Budget", 50.0f, 1, imageUrl);
+            } else if ("Montpellier".equals(hotelVille)) {
+                ajouterChambre(21, "Chambre Eco", 45.0f, 1, imageUrl);
+                ajouterChambre(22, "Chambre Double Confort", 85.0f, 2, imageUrl);
+                ajouterChambre(23, "Suite Vue Mer", 140.0f, 2, imageUrl);
+                ajouterChambre(24, "Chambre Quad", 110.0f, 4, imageUrl);
+                ajouterChambre(25, "Studio", 65.0f, 1, imageUrl);
+            }
+
+            System.out.println("  Chambres ajoutées: " + hotel.getListeDesChambres().size());
+            System.out.println("  URL image: " + imageUrl);
         }
 
-        System.out.println("  Chambres ajoutées: " + hotel.getListeDesChambres().size());
-        System.out.println("  URL image: " + imageUrl);
+        // Initialiser le compteur de réservations
+        if (!hotel.getListeReservation().isEmpty()) {
+            int maxId = hotel.getListeReservation().stream()
+                .mapToInt(Reservation::getNumeroReservation)
+                .max()
+                .orElse(0);
+            reservationIdCounter.set(maxId + 1);
+        }
+
         System.out.println("═══════════════════════════════════════════");
+    }
+
+    private void ajouterChambre(int numeroChambre, String nom, float prix, int nbrDeLit, String imageUrl) {
+        // Vérifier si la chambre existe déjà
+        Optional<Chambre> existing = chambreRepository.findByNumeroChambreAndHotelId(numeroChambre, hotel.getId());
+        if (existing.isEmpty()) {
+            Chambre chambre = new Chambre(numeroChambre, nom, prix, nbrDeLit, imageUrl);
+            chambre.setHotel(hotel);
+            chambreRepository.save(chambre);
+            hotel.getListeDesChambres().add(chambre);
+        }
     }
 
     private String getImageFileName() {
@@ -101,6 +150,7 @@ public class HotelService {
     /**
      * Recherche des chambres disponibles selon des critères
      */
+    @Transactional(readOnly = true)
     public List<Chambre> rechercherChambres(String adresse, String dateArrive, String dateDepart,
                                             Float prixMin, Float prixMax, Integer nbrEtoile, Integer nbrLits) {
 
@@ -128,8 +178,11 @@ public class HotelService {
             }
         }
 
+        // Récupérer toutes les chambres depuis la base
+        List<Chambre> toutesLesChambres = chambreRepository.findByHotelId(hotel.getId());
+
         // Parcourir les chambres
-        for (Chambre chambre : hotel.getListeDesChambres()) {
+        for (Chambre chambre : toutesLesChambres) {
             if (chambre == null) continue;
 
             // Vérifier le prix
@@ -140,23 +193,11 @@ public class HotelService {
             if (nbrLits != null && nbrLits > 0 && chambre.getNbrDeLit() < nbrLits) continue;
 
             // Vérifier la disponibilité
-            boolean disponible = true;
-            for (Reservation r : hotel.getListeReservation()) {
-                if (r == null || r.getChambre() == null) continue;
-                if (r.getChambre().getId() != chambre.getId()) continue;
+            List<Reservation> reservations = reservationRepository.findOverlappingReservations(
+                chambre.getId(), arrive, depart
+            );
 
-                Date resArrive = parseDate(formatDate(r.getDateArrive()));
-                Date resDepart = parseDate(formatDate(r.getDateDepart()));
-
-                if (resArrive != null && resDepart != null) {
-                    if (datesChevauchent(arrive, depart, resArrive, resDepart)) {
-                        disponible = false;
-                        break;
-                    }
-                }
-            }
-
-            if (disponible) {
+            if (reservations.isEmpty()) {
                 chambresDisponibles.add(chambre);
             }
         }
@@ -167,24 +208,28 @@ public class HotelService {
     /**
      * Effectue une réservation
      */
-    public ReservationResult effectuerReservation(Client client, int chambreId, String dateArrive, String dateDepart) {
+    public ReservationResult effectuerReservation(Client client, long chambreId, String dateArrive, String dateDepart) {
         // Vérifier que le client est valide
         if (client == null || client.getNom() == null || client.getNom().isEmpty()) {
             return new ReservationResult(0, false, "Client invalide");
         }
 
-        // Trouver la chambre
-        Chambre chambre = null;
-        for (Chambre c : hotel.getListeDesChambres()) {
-            if (c.getId() == chambreId) {
-                chambre = c;
-                break;
-            }
+        // Trouver ou créer le client dans la base
+        Client clientDB = clientRepository.findByNumeroCarteBleue(client.getNumeroCarteBleue())
+            .orElse(null);
+
+        if (clientDB == null) {
+            clientDB = clientRepository.save(client);
         }
 
-        if (chambre == null) {
+        // Trouver la chambre par son ID
+        Optional<Chambre> chambreOpt = chambreRepository.findById(chambreId);
+
+        if (chambreOpt.isEmpty()) {
             return new ReservationResult(0, false, "Chambre non trouvée");
         }
+
+        Chambre chambre = chambreOpt.get();
 
         // Vérifier les dates
         Date arrive = parseDate(dateArrive);
@@ -195,53 +240,53 @@ public class HotelService {
         }
 
         // Vérifier la disponibilité
-        for (Reservation r : hotel.getListeReservation()) {
-            if (r.getChambre().getId() == chambreId) {
-                Date resArrive = parseDate(formatDate(r.getDateArrive()));
-                Date resDepart = parseDate(formatDate(r.getDateDepart()));
+        List<Reservation> reservationsExistantes = reservationRepository.findOverlappingReservations(
+            chambre.getId(), arrive, depart
+        );
 
-                if (resArrive != null && resDepart != null) {
-                    if (datesChevauchent(arrive, depart, resArrive, resDepart)) {
-                        return new ReservationResult(0, false, "Chambre déjà réservée pour ces dates");
-                    }
-                }
-            }
+        if (!reservationsExistantes.isEmpty()) {
+            return new ReservationResult(0, false, "Chambre déjà réservée pour ces dates");
         }
 
         // Créer la réservation
-        int reservationId = reservationIdCounter.getAndIncrement();
-        Reservation reservation = new Reservation(reservationId, client, chambre, arrive, depart);
-        hotel.ajoutReservation(reservation);
+        int reservationNumero = reservationIdCounter.getAndIncrement();
+        Reservation reservation = new Reservation(reservationNumero, clientDB, chambre, arrive, depart);
+        reservation.setHotel(hotel);
+        reservation = reservationRepository.save(reservation);
 
-        return new ReservationResult(reservationId, true, "Réservation effectuée avec succès");
+        return new ReservationResult(reservationNumero, true, "Réservation effectuée avec succès");
     }
 
     /**
      * Obtenir toutes les réservations
      */
+    @Transactional(readOnly = true)
     public List<Reservation> getReservations() {
-        return hotel.getListeReservation();
+        return reservationRepository.findByHotelId(hotel.getId());
     }
 
     /**
      * Obtenir la liste des chambres qui ont au moins une réservation
      */
+    @Transactional(readOnly = true)
     public List<org.tp1.hotellerie.dto.ChambreDTO> getChambresReservees() {
         List<org.tp1.hotellerie.dto.ChambreDTO> chambresReservees = new java.util.ArrayList<>();
-        java.util.Set<Integer> chambresReserveesIds = new java.util.HashSet<>();
+        java.util.Set<Long> chambresReserveesIds = new java.util.HashSet<>();
 
         // Parcourir toutes les réservations pour identifier les chambres réservées
-        for (Reservation reservation : hotel.getListeReservation()) {
+        List<Reservation> reservations = reservationRepository.findByHotelId(hotel.getId());
+        for (Reservation reservation : reservations) {
             if (reservation != null && reservation.getChambre() != null) {
                 chambresReserveesIds.add(reservation.getChambre().getId());
             }
         }
 
         // Créer les DTOs pour les chambres réservées
-        for (Chambre chambre : hotel.getListeDesChambres()) {
+        List<Chambre> chambres = chambreRepository.findByHotelId(hotel.getId());
+        for (Chambre chambre : chambres) {
             if (chambresReserveesIds.contains(chambre.getId())) {
                 org.tp1.hotellerie.dto.ChambreDTO dto = new org.tp1.hotellerie.dto.ChambreDTO(
-                    (long) chambre.getId(),
+                    chambre.getId(),
                     chambre.getNom(),
                     chambre.getPrix(),
                     chambre.getNbrDeLit(),
@@ -305,4 +350,5 @@ public class HotelService {
         }
     }
 }
+
 

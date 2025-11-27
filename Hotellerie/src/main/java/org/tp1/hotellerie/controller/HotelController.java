@@ -77,7 +77,7 @@ public class HotelController {
         // Convertir les Chambres en ChambreDTO
         List<ChambreDTO> chambreDTOs = chambres.stream()
             .map(chambre -> new ChambreDTO(
-                (long) chambre.getId(),
+                chambre.getId(),
                 chambre.getNom(),
                 chambre.getPrix(),
                 chambre.getNbrDeLit(),
@@ -110,10 +110,10 @@ public class HotelController {
             request.getNumeroCarteBancaire()
         );
 
-        // Effectuer la réservation
+        // Effectuer la réservation (utilise l'ID de la chambre)
         HotelService.ReservationResult result = hotelService.effectuerReservation(
             client,
-            request.getChambreId().intValue(),
+            request.getChambreId(), // ID de la chambre (Long)
             request.getDateArrive(),
             request.getDateDepart()
         );
@@ -171,9 +171,9 @@ public class HotelController {
         Hotel hotel = hotelService.getHotel();
 
         for (Chambre chambre : hotel.getListeDesChambres()) {
-            if (chambre.getId() == id.intValue()) {
+            if (chambre.getId().equals(id)) {
                 ChambreDTO dto = new ChambreDTO(
-                    (long) chambre.getId(),
+                    chambre.getId(),
                     chambre.getNom(),
                     chambre.getPrix(),
                     chambre.getNbrDeLit(),
