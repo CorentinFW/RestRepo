@@ -1,0 +1,20 @@
+1 Le projet
+1.1 Mise en contexte
+1.2 Les technologies et les idées
+2 L'hotel
+2.1 Logique métier
+2.2 implementation Rest
+3 L'agence
+3.1 Utilité
+3.2 Implementation Rest
+4 Client
+4.1 Fonctionnalités
+4.2 Implementation Rest
+5 interfaces
+5.1 Interface Client
+5.2 image et console
+6 BDD H2
+6.1 Structure de la BDD
+6.2 Requêtes principales
+7 Evolution
+8 Conclusion
