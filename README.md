@@ -2,11 +2,22 @@
 
 ## 🚀 DÉMARRAGE RAPIDE (1 Commande)
 
+### Option 1 : Avec conservation des données (recommandé)
 ```bash
-./start-system-maven.sh
+./rest-restart.sh
 ```
 
-**Temps : ~20 secondes → Une fenêtre graphique s'ouvre avec 20 chambres disponibles !**
+### Option 2 : Avec reset complet des bases de données
+```bash
+./rest-all-restart.sh
+```
+
+### Option 3 : Lancer uniquement l'interface graphique
+```bash
+./rest-client.sh           # Les services backend doivent être déjà lancés
+```
+
+**Temps : ~60 secondes → Une fenêtre graphique s'ouvre avec 20 chambres disponibles !**
 
 **Pour arrêter :**
 ```bash
@@ -240,14 +251,40 @@ pkill -f 'java.*Hotellerie'
 
 ## 🐛 Dépannage
 
+### 🔍 Scripts de Diagnostic (NOUVEAUX !)
+
+**Vérifier l'état des services :**
+```bash
+./verifier-services.sh
+```
+
+**Consulter les logs :**
+```bash
+./voir-logs.sh              # Menu interactif
+./voir-logs.sh paris        # Log d'un service spécifique
+./voir-logs.sh all          # Tous les logs
+./voir-logs.sh follow       # Suivi en temps réel
+```
+
+**Documentation complète :** `OverFile/AllReadme/GUIDE-DIAGNOSTIC-LOGS.md`
+
+---
+
 ### Problème : "Aucune chambre trouvée"
 
 **Cause :** Services backend pas démarrés
 
 **Solution :**
 ```bash
-# Vérifier les services
-ps aux | grep -E 'java.*Agence|java.*Hotellerie' | grep -v grep
+# 1. Vérifier l'état des services
+./verifier-services.sh
+
+# 2. Si certains services sont KO, voir les logs
+./voir-logs.sh all
+
+# 3. Relancer le système
+./arreter-services.sh
+./rest-persistant.sh
 
 # Si vide, relancer
 ./start-system-complete-gui.sh
@@ -303,21 +340,59 @@ export DISPLAY=:0
 ## 🚀 COMMANDES ESSENTIELLES
 
 ```bash
-# Démarrer le système complet (Maven)
-./start-system-maven.sh
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🚀 DÉMARRAGE (3 SCRIPTS CONSOLIDÉS)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Arrêter tous les services
+# 1. Redémarrage COMPLET (hôtels + agences + client + BDD RESET)
+./rest-all-restart.sh
+
+# 2. Redémarrage avec PERSISTANCE (hôtels + agences + client + BDD conservée)
+./rest-restart.sh              # ⭐ RECOMMANDÉ pour usage normal
+
+# 3. Client GUI uniquement (backend doit être déjà lancé)
+./rest-client.sh
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔍 DIAGNOSTIC (NOUVEAU !)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Vérifier l'état de tous les services
+./verifier-services.sh
+
+# Consulter les logs
+./voir-logs.sh              # Menu interactif
+./voir-logs.sh paris        # Log d'un service spécifique
+./voir-logs.sh all          # Tous les logs
+./voir-logs.sh follow       # Suivi en temps réel
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🛑 ARRÊT
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Arrêter tous les services proprement
 ./arreter-services.sh
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 📝 LOGS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # Voir les logs en temps réel
 tail -f logs/hotel-paris.log
 tail -f logs/agence1.log
+tail -f logs/client-gui.log      # Nouveau : logs du client GUI
 
-# Nettoyer les services et ports
-./nettoyer-services.sh
+# Avec coloration (si ccze installé)
+tail -f logs/hotel-paris.log | ccze -A
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔧 MAINTENANCE
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # Compiler tous les modules (si modifications)
-./compile-all.sh
+cd Hotellerie && mvn clean package -DskipTests && cd ..
+cd Agence && mvn clean package -DskipTests && cd ..
+cd Client && mvn clean package -DskipTests && cd ..
 ```
 
 ---
