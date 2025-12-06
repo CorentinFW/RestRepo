@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 /**
  * Client REST qui interroge plusieurs hôtels en parallèle
- * Remplace l'ancien MultiHotelSoapClient
+
  */
 @Component
 public class MultiHotelRestClient {
