@@ -1,4 +1,4 @@
-# 🏨 Système de Réservation Multi-Agences - Interface Graphique
+# 🏨 Système de Réservation Multi-Agences En reste
 
 ## 🚀 DÉMARRAGE RAPIDE (1 Commande)
 
@@ -34,14 +34,14 @@
 
 ---
 
-## 🎯 Architecture
+## Architecture
 
 ```
 CLIENT GUI (Interface Swing)
       │
       ├──> AGENCE 1 (Paris Voyages - 8081)
       │    ├─> Hôtel Paris (8082)
-      │    └─> Hôtel Lyon (8083)
+      │    └─> Hôtel Lyon (8083) [Partagé]
       │
       └──> AGENCE 2 (Sud Réservations - 8085)
            ├─> Hôtel Lyon (8083) [Partagé]
@@ -52,18 +52,7 @@ CLIENT GUI (Interface Swing)
 
 ---
 
-## 🎮 Utilisation de l'Interface
-
-### Démarrage
-
-```bash
-./start-system-maven.sh
-```
-
-**Le script démarre automatiquement :**
-- Les 3 hôtels (Paris, Lyon, Montpellier)
-- Les 2 agences (Agence 1, Agence 2)
-- L'interface graphique Swing
+## Utilisation de l'Interface
 
 ### Recherche de Chambres
 
@@ -103,65 +92,36 @@ CLIENT GUI (Interface Swing)
 
 ---
 
-## 📂 Structure du Projet
-
-```
-RestRepo/
-├── compile-all.sh                    ⭐ Compiler tous les modules
-├── start-system-complete-gui.sh      ⭐ Démarrer tout le système
-├── GUIDE-FINAL-DEMARRAGE.md          📖 Guide complet
-│
-├── Hotellerie/                       🏨 Module Hôtels
-│   └── target/Hotellerie-*.jar
-│
-├── Agence/                           🏢 Module Agences  
-│   └── target/Agence-*.jar
-│
-├── Client/                           🖥️ Interface Graphique
-│   └── target/Client-*.jar
-│
-├── logs/                             📝 Logs des services
-│   ├── hotel-paris.log
-│   ├── hotel-lyon.log
-│   ├── hotel-montpellier.log
-│   ├── agence.log
-│   └── agence2.log
-│
-└── OverFile/                         📁 Documentation archivée
-    ├── AllReadme/                    📚 Tous les .md
-    └── BashSh/                       🔧 Scripts archivés
-```
-
 ---
 
-## ✨ Fonctionnalités
+## Fonctionnalités
 
 ### Interface Graphique Swing
 
-- ✅ Formulaire de recherche graphique
-- ✅ Tableau interactif des résultats
-- ✅ Réservation en quelques clics
-- ✅ Console de logs en temps réel
-- ✅ Menus et raccourcis clavier
-- ✅ Comparaison de prix multi-agences
+- Formulaire de recherche graphique
+- Tableau interactif des résultats
+- Réservation en quelques clics
+- Console de logs en temps réel
+- Menus et raccourcis clavier
+- Comparaison de prix multi-agences
 
 ### Multi-Agences
 
-- ✅ 2 agences interrogées en parallèle
-- ✅ Comparaison de prix automatique
-- ✅ Hôtel Lyon partagé entre les 2 agences
-- ✅ Coefficients différents (1.15 vs 1.20)
+- 2 agences interrogées en parallèle
+- Comparaison de prix automatique
+- Hôtel Lyon partagé entre les 2 agences
+- Coefficients différents (1.15 vs 1.20)
 
 ### Données
 
-- ✅ 3 hôtels (Paris, Lyon, Montpellier)
-- ✅ 5 chambres par hôtel
-- ✅ 20 chambres visibles au total
-- ✅ Images des chambres
+- 3 hôtels (Paris, Lyon, Montpellier)
+- 5 chambres par hôtel
+- 20 chambres visibles au total
+- Images des chambres
 
 ---
 
-## 🛑 Arrêter le Système
+## Arrêter le Système
 
 ### Fermer l'Interface
 
@@ -176,7 +136,7 @@ pkill -f 'java.*Hotellerie'
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 - **GUIDE-FINAL-DEMARRAGE.md** - Guide complet de démarrage
 - **OverFile/AllReadme/** - Toute la documentation du projet
@@ -184,34 +144,8 @@ pkill -f 'java.*Hotellerie'
 
 ---
 
-## 🔧 Développement
-
-### Démarrage avec Maven (Recommandé)
-
-**Un seul script pour tout :**
-```bash
-./start-system-maven.sh
-```
-
 **Logs dans :** `logs/*.log`
 
----
-
-### Démarrage Manuel (6 Terminaux)
-
-**Pour développement/débogage avec logs visibles :**
-
-```bash
-# Afficher les commandes
-./afficher-commandes.sh
-
-# Puis dans 6 terminaux :
-# Terminal 1-3 : Les 3 hôtels avec Maven
-# Terminal 4-5 : Les 2 agences avec Maven  
-# Terminal 6 : Le client GUI
-```
-
----
 
 ### Recompiler Après Modifications
 
@@ -221,7 +155,7 @@ pkill -f 'java.*Hotellerie'
 
 ---
 
-## ✅ Test de Fonctionnement
+## Test de Fonctionnement
 
 ### Test 1 : Recherche Lyon
 
@@ -247,48 +181,8 @@ pkill -f 'java.*Hotellerie'
 
 **Résultat attendu :** 20 chambres
 
----
-
-## 🐛 Dépannage
-
-### 🔍 Scripts de Diagnostic (NOUVEAUX !)
-
-**Vérifier l'état des services :**
-```bash
-./verifier-services.sh
-```
-
-**Consulter les logs :**
-```bash
-./voir-logs.sh              # Menu interactif
-./voir-logs.sh paris        # Log d'un service spécifique
-./voir-logs.sh all          # Tous les logs
-./voir-logs.sh follow       # Suivi en temps réel
-```
-
-**Documentation complète :** `OverFile/AllReadme/GUIDE-DIAGNOSTIC-LOGS.md`
 
 ---
-
-### Problème : "Aucune chambre trouvée"
-
-**Cause :** Services backend pas démarrés
-
-**Solution :**
-```bash
-# 1. Vérifier l'état des services
-./verifier-services.sh
-
-# 2. Si certains services sont KO, voir les logs
-./voir-logs.sh all
-
-# 3. Relancer le système
-./arreter-services.sh
-./rest-persistant.sh
-
-# Si vide, relancer
-./start-system-complete-gui.sh
-```
 
 ### Problème : "BUILD FAILURE"
 
@@ -327,7 +221,7 @@ export DISPLAY=:0
 
 ---
 
-## 🎉 Version
+## Version
 
 - **Version :** 2.0 - Interface Graphique Swing
 - **Date :** 26 novembre 2025
@@ -337,11 +231,11 @@ export DISPLAY=:0
 
 ---
 
-## 🚀 COMMANDES ESSENTIELLES
+## COMMANDES ESSENTIELLES
 
 ```bash
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🚀 DÉMARRAGE (3 SCRIPTS CONSOLIDÉS)
+#  DÉMARRAGE (3 SCRIPTS CONSOLIDÉS)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # 1. Redémarrage COMPLET (hôtels + agences + client + BDD RESET)
@@ -354,27 +248,14 @@ export DISPLAY=:0
 ./rest-client.sh
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🔍 DIAGNOSTIC (NOUVEAU !)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-# Vérifier l'état de tous les services
-./verifier-services.sh
-
-# Consulter les logs
-./voir-logs.sh              # Menu interactif
-./voir-logs.sh paris        # Log d'un service spécifique
-./voir-logs.sh all          # Tous les logs
-./voir-logs.sh follow       # Suivi en temps réel
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🛑 ARRÊT
+# ARRÊT
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # Arrêter tous les services proprement
 ./arreter-services.sh
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 📝 LOGS
+# LOGS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # Voir les logs en temps réel
@@ -386,16 +267,12 @@ tail -f logs/client-gui.log      # Nouveau : logs du client GUI
 tail -f logs/hotel-paris.log | ccze -A
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# 🔧 MAINTENANCE
+# MAINTENANCE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Compiler tous les modules (si modifications)
+# Compiler tous les modules (si Problème)
 cd Hotellerie && mvn clean package -DskipTests && cd ..
 cd Agence && mvn clean package -DskipTests && cd ..
 cd Client && mvn clean package -DskipTests && cd ..
 ```
-
----
-
-**Prêt à utiliser !** 🎨✨
 
